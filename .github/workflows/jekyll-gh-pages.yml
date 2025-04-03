@@ -1,0 +1,58 @@
+name: Update LitePolis Repositories Website
+
+on:
+  schedule:
+    # Runs daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  update_website:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to commit changes and push to gh-pages branch
+      pages: write    # Needed to deploy to GitHub Pages (if using GitHub Pages deployment action)
+      id-token: write # Needed for some deployment actions
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4 # Use latest version
+
+      - name: Set up Python
+        uses: actions/setup-python@v5 # Use latest version
+        with:
+          python-version: '3.11' # Specify a Python version
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pyyaml
+
+      - name: Run Data Fetching Script
+        # Provide GITHUB_TOKEN for potentially higher rate limits
+        run: python scripts/fetch_data.py
+
+      # Setup Ruby, Bundler, and Jekyll
+      - name: Set up Ruby and Jekyll
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2' # Or your preferred Ruby version
+          bundler-cache: true # Automatically runs bundle install and caches gems
+
+      # Build the Jekyll site
+      - name: Build Jekyll Site
+        run: bundle exec jekyll build --config _config.yml --destination ./_site
+        env:
+          JEKYLL_ENV: production # Ensure production build
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4 # Use latest version
+        with:
+          publish_dir: ./_site # Directory containing the static site files
+          # Optional: Specify branch if not gh-pages, e.g., publish_branch: main
+          # Optional: Keep history, force push, etc.
+          # force_orphan: true # Creates a clean history for the gh-pages branch
+          # user_name: 'github-actions[bot]'
+          # user_email: 'github-actions[bot]@users.noreply.github.com'
+          # commit_message: 'Deploy LitePolis website update'
