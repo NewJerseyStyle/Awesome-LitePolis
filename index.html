@@ -1,0 +1,39 @@
+---
+layout: default
+title: Home
+---
+
+<div class="repo-list">
+  <h2>LitePolis Repositories</h2>
+  {% if site.data.repositories %}
+    <ul>
+      {% for repo in site.data.repositories %}
+        <li>
+          <h3><a href="{{ repo.url }}" target="_blank" rel="noopener noreferrer">{{ repo.name }}</a></h3>
+          {% if repo.description %}
+            <p>{{ repo.description }}</p>
+          {% endif %}
+
+          {% if repo.install_command %}
+            <p><strong>Install:</strong> <code>{{ repo.install_command }}</code></p>
+          {% endif %}
+
+          {% if repo.license %}
+            <p><strong>License:</strong> {{ repo.license }}</p>
+          {% endif %}
+
+          {% if repo.readme %}
+            <details>
+              <summary>README Preview</summary>
+              <pre><code>{{ repo.readme | truncate: 300 }}</code></pre>
+              <p><a href="{{ repo.url }}#readme" target="_blank" rel="noopener noreferrer">View full README on GitHub</a></p>
+            </details>
+          {% endif %}
+          <hr>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No repositories found or data not yet loaded.</p>
+  {% endif %}
+</div>
