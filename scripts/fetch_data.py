@@ -92,6 +92,14 @@ def main():
 
     for item in search_results['items']:
         repo_name = item['name']
+        
+        # Add filtering logic for repository names
+        if not repo_name.startswith('LitePolis-') or \
+           repo_name == 'LitePolis' or \
+           repo_name.endswith('-template'):
+            print(f"Skipping {repo_name} - doesn't match naming criteria")
+            continue
+            
         repo_full_name = item['full_name']
         print(f"Processing: {repo_full_name}")
 
