@@ -116,7 +116,7 @@ def main():
         # Example: LitePolis-Core -> litepolis-core
         pypi_package_name = repo_name.lower()
         if check_pypi(pypi_package_name):
-            repo_info["install_command"] = f"litepolis-cli deploy add {pypi_package_name}"
+            repo_info["install_command"] = f"litepolis-cli deploy add-deps {pypi_package_name}"
             print(f"  Found on PyPI: {pypi_package_name}")
         else:
             repo_info["install_command"] = None
