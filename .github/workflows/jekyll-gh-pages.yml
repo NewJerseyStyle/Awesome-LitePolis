@@ -29,8 +29,16 @@ jobs:
           pip install requests pyyaml
 
       - name: Run Data Fetching Script
-        # Provide GITHUB_TOKEN for potentially higher rate limits
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/fetch_data.py
+
+      - name: Check if data file exists and is non-empty
+        run: |
+          if [ ! -s _data/repositories.yml ]; then
+            echo "repositories.yml is missing or empty. Stopping workflow."
+            exit 1
+          fi
 
       # Setup Ruby, Bundler, and Jekyll
       - name: Set up Ruby and Jekyll
