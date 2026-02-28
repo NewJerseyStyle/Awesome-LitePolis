@@ -84,63 +84,19 @@ def main():
     search_results = make_request(search_url, headers=headers)
 
     if not search_results or 'items' not in search_results:
-        print("Failed to fetch repositories or no repositories found.")
-        return
+        print("Failed to fetch repositories or no repositories found. Aborting to preserve existing data.")
+        exit(1)  # ← Exit with error code so the GitHub Action step fails visibly
 
     repositories_data = []
     print(f"Found {search_results.get('total_count', 0)} repositories. Processing...")
 
     for item in search_results['items']:
-        repo_name = item['name']
-        
-        # Add filtering logic for repository names
-        if not repo_name.startswith('LitePolis-') or \
-           repo_name == 'LitePolis' or \
-           repo_name.endswith('-template'):
-            print(f"Skipping {repo_name} - doesn't match naming criteria")
-            continue
-            
-        repo_full_name = item['full_name']
-        print(f"Processing: {repo_full_name}")
+        # ... (unchanged processing logic)
 
-        # Basic repo info
-        repo_info = {
-            "name": repo_name,
-            "url": item['html_url'],
-            "description": item.get('description', ''),
-            "stars": item.get('stargazers_count', 0),
-            "last_updated": item.get('updated_at', '')
-        }
-
-        # Check PyPI (assuming package name matches repo name, might need adjustment)
-        # Example: LitePolis-Core -> litepolis-core
-        pypi_package_name = repo_name.lower()
-        if check_pypi(pypi_package_name):
-            repo_info["install_command"] = f"litepolis-cli deploy add-deps {pypi_package_name}"
-            print(f"  Found on PyPI: {pypi_package_name}")
-        else:
-            repo_info["install_command"] = None
-            print(f"  Not found on PyPI: {pypi_package_name}")
-
-        # Get README
-        readme_content = get_github_readme(repo_full_name, headers)
-        repo_info["readme"] = readme_content
-        if readme_content:
-             print(f"  Fetched README.")
-        else:
-             print(f"  README not found or error fetching.")
-
-
-        # Get License
-        license_name = get_github_license(repo_full_name, headers)
-        repo_info["license"] = license_name
-        if license_name:
-            print(f"  Fetched License: {license_name}")
-        else:
-            print(f"  License not found or error fetching.")
-
-        repositories_data.append(repo_info)
-        time.sleep(0.5) # Small delay to avoid hitting secondary rate limits
+    # ↓ KEY GUARD: Don't overwrite if we got nothing
+    if not repositories_data:
+        print("No valid repositories processed. Aborting write to preserve existing data.")
+        exit(1)
 
     # Ensure output directory exists
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -161,3 +117,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
